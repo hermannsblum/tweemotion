@@ -2,7 +2,9 @@ import tweepy
 import webbrowser
 import json
 from sys import argv
-from pprint import pprint
+import redis
+
+red = redis.StrictRedis()
 
 
 def connect(remote=False):
@@ -98,9 +100,10 @@ def collect_sample_data(auth, number, geo=False):
     my_stream.filter(languages=['en'], locations=[-115, 25, -65, 50])
 
 
+
 if __name__ == '__main__':
 
-    if len(argv) != 2 or argv[1] not in ['sample', 'stream']:
+    if len(argv) != 2 or argv[1] not in ['sample', 'stream', 'publish']:
         print('Please provide an argument.\nEither "sample" or "stream".')
 
     else:
@@ -125,6 +128,12 @@ if __name__ == '__main__':
                 geo = raw_input('Collect coordinates? [y/n] ')
 
             collect_sample_data(auth, number, geo=(geo == 'y'))
+
+        elif argv[1] == 'publish':
+            def tweet_publisher(status):
+                red.publish('tweet_stream', status.text)
+
+            listen(tweet_publisher, auth)
 
         elif argv[1] == 'stream':
             def tweet_printer(status):
