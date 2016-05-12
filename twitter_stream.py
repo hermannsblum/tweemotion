@@ -5,7 +5,7 @@ from sys import argv
 from pprint import pprint
 
 
-def connect():
+def connect(remote=False):
     token = 'H38UfwBmX3AesWlUXMDmCRkXV'
     secret = 'Ml7DJ5LmWjsogw8cMoyqC0FX2JtLwY6I9FFdOOIUBymj0E8PGF'
 
@@ -18,9 +18,12 @@ def connect():
         print('Error! Failed to get request token.')
 
     # login
-    print('logging you in to twitter...')
-    webbrowser.open(redirect_url, new=2)
-    #
+    if remote:
+        print('open the following url in your browser: %s' % redirect_url)
+    else:
+        print('logging you in to twitter...')
+        webbrowser.open(redirect_url, new=2)
+
     verifier = raw_input('Verifier:')
 
     try:
@@ -101,10 +104,12 @@ if __name__ == '__main__':
         print('Please provide an argument.\nEither "sample" or "stream".')
 
     else:
-
+        remote = " "
+        while remote not in ['y', 'n']:
+            remote = raw_input('are you working remotely? (y/n) ')
 
         # authentication
-        auth = connect()
+        auth = connect(remote=(remote == 'y'))
 
         if argv[1] == 'sample':
             correct = False
@@ -120,7 +125,6 @@ if __name__ == '__main__':
                 geo = raw_input('Collect coordinates? [y/n] ')
 
             collect_sample_data(auth, number, geo=(geo == 'y'))
-
 
         elif argv[1] == 'stream':
             def tweet_printer(status):
