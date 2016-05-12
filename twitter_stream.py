@@ -2,6 +2,7 @@ import tweepy
 import webbrowser
 import json
 from sys import argv
+from pprint import pprint
 
 
 def connect():
@@ -45,7 +46,7 @@ def listen(func, auth):
     myStream.filter(languages=['en'], locations=[-115, 25, -65, 50])
 
 
-def collect_sample_data(auth, number):
+def collect_sample_data(auth, number, geo=False):
 
     class Collector(tweepy.StreamListener):
 
@@ -56,12 +57,36 @@ def collect_sample_data(auth, number):
             self.max_tweets = max
 
         def on_status(self, status):
-            self.tweets.append(status.text)
+            if geo:
+                # add information about geolocation in lon-lat-format
+                if status.geo is not None:
+                    # we have detailed coordinate information
+                    coordinates = (status.geo['coordinates'][1],
+                                   status.geo['coordinates'][0])
+                    data = {'text': status.text,
+                            'coordinates': coordinates}
+                elif status.place is not None:
+                    # we have information about the city
+                    bottom_left = status.place.bounding_box.origin()
+                    upper_right = status.place.bounding_box.corner()
+                    # find center of city
+                    center = ((bottom_left[0] + upper_right[0]) / 1.0,
+                              (bottom_left[1] + upper_right[1]) / 1.0)
+                    data = {'text': status.text,
+                            'coordinates': center}
+                else:
+                    # we can't use this tweet
+                    return True
+            else:
+                data = status.text
+            self.tweets.append(data)
 
             if len(self.tweets) >= self.max_tweets:
                 with open('sample_data.json', 'w') as f:
                     json.dump(self.tweets, f)
                 f.close()
+                print('%i tweets collected into file "sample_data.json"'
+                      % len(self.tweets))
                 return False
 
     api = tweepy.API(auth)
@@ -90,9 +115,12 @@ if __name__ == '__main__':
                     correct = True
                 except ValueError:
                     print('Not a number!')
+            geo = " "
+            while geo not in ['y', 'n']:
+                geo = raw_input('Collect coordinates? [y/n] ')
 
-            collect_sample_data(auth, number)
-            print('%i tweets collected into file "sample_data.json"' % number)
+            collect_sample_data(auth, number, geo=(geo == 'y'))
+
 
         elif argv[1] == 'stream':
             def tweet_printer(status):
