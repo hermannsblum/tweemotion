@@ -91,18 +91,47 @@ plt.ylabel('Weighted frequency f')
 plt.xlabel('Valence v')
 
 
-####################### MERGE WITH ANEWAPI ########################
-
-
-
-
+####################### Compute Sentiment ########################
 import urllib, urllib2
 import datetime
 import nltk
 import time
+from compSent import compSent
+from tweet_cleanup import cleanup
 
 try:
     import json
 except ImportError:
         import simplejson as json
 
+tdict = []
+
+
+    tweets = json.load(f)
+    #for tweet in tweets:
+    #    tweet,_ = cleanup(tweet)
+    #    tdict.append(tweet)        
+    
+tokens = nltk.word_tokenize(tweets[1])
+
+anew_dict['thanks']
+
+test=str(tokens[2])
+
+
+out=anew_dict[test.lower()]
+
+out[1]
+
+x = compSent()
+
+x.compSentiment(tweet)
+
+
+        
+
+    
+
+
+
+    
