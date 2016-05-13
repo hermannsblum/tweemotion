@@ -27,6 +27,7 @@ def stream():
         # initiate server-sent events on messages pushed to channel
         for message in pubsub.listen():
             yield 'data: %s\n\n' % message['data']
+            time.sleep(.2)  # an artificial delay
     return Response(stream_with_context(event_stream()),
                     mimetype="text/event-stream")
 

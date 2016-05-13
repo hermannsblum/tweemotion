@@ -51,6 +51,25 @@ def listen(func, auth):
     myStream.filter(languages=['en'], locations=[-115, 25, -65, 50])
 
 
+def get_coordinates(tweet):
+    """Get coordinates of tweet in lat-lon-format."""
+    if tweet.geo is not None:
+        # we have detailed coordinate information
+        coordinates = (tweet.geo['coordinates'][1],
+                       tweet.geo['coordinates'][0])
+    elif tweet.place is not None:
+        # we have information about the city
+        bottom_left = tweet.place.bounding_box.origin()
+        upper_right = tweet.place.bounding_box.corner()
+        # find center of city
+        coordinates = ((bottom_left[0] + upper_right[0]) / 2.0,
+                       (bottom_left[1] + upper_right[1]) / 2.0)
+    else:
+        # we can't use this tweet
+        return None
+    return coordinates
+
+
 def collect_sample_data(auth, number, geo=False):
 
     class Collector(tweepy.StreamListener):
@@ -64,24 +83,10 @@ def collect_sample_data(auth, number, geo=False):
         def on_status(self, status):
             if geo:
                 # add information about geolocation in lon-lat-format
-                if status.geo is not None:
-                    # we have detailed coordinate information
-                    coordinates = (status.geo['coordinates'][1],
-                                   status.geo['coordinates'][0])
+                coord = get_coordinates(status)
+                if coord is not None:
                     data = {'text': status.text,
-                            'coordinates': coordinates}
-                elif status.place is not None:
-                    # we have information about the city
-                    bottom_left = status.place.bounding_box.origin()
-                    upper_right = status.place.bounding_box.corner()
-                    # find center of city
-                    center = ((bottom_left[0] + upper_right[0]) / 1.0,
-                              (bottom_left[1] + upper_right[1]) / 1.0)
-                    data = {'text': status.text,
-                            'coordinates': center}
-                else:
-                    # we can't use this tweet
-                    return True
+                            'coordinates': coord}
             else:
                 data = status.text
             self.tweets.append(data)
@@ -131,7 +136,11 @@ if __name__ == '__main__':
 
         elif argv[1] == 'publish':
             def tweet_publisher(status):
-                red.publish('tweet_stream', status.text)
+                data = {
+                    'tweet': status.text,
+                    'coordinates': get_coordinates(status)
+                }
+                red.publish('tweet_stream', json.dumps(data))
 
             listen(tweet_publisher, auth)
 
