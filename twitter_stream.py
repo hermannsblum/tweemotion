@@ -78,12 +78,39 @@ def get_sentiment(tweet, emoji_classifier, text_classifier):
     tweet, emojis = cleanup(tweet.text)
 
     emoji_sentiment = emoji_classifier.classify(emojis)
-    text_sentiment = text_classifier.compSentiment(tweet)
+    text_sentiment = text_classifier.compSentiment_v(tweet)
 
     if not isnan(emoji_sentiment):
         return 0.65 * emoji_sentiment + 0.35 * text_sentiment
     else:
         return text_sentiment
+
+
+def get_emotion(tweet, text_classifier):
+    text, _ = cleanup(tweet.text)
+    valence = text_classifier.compSentiment_v(text)
+    arousal = text_classifier.compSentiment_a(text)
+    dominance = text_classifier.compSentiment_d(text)
+
+    if isnan(valence) or isnan(arousal) or isnan(dominance):
+        return None
+    if valence >= 5 and arousal >= 5 and dominance >= 5:
+        return 'happy'
+    elif valence >= 5 and arousal >= 5 and dominance < 5:
+        return 'excited'
+    elif valence >= 5 and arousal < 5 and dominance >= 5:
+        return 'relaxed'
+    elif valence >= 5 and arousal < 5 and dominance < 5:
+        return 'satisfied'
+    elif valence < 5 and arousal >= 5 and dominance >= 5:
+        return 'angry'
+    elif valence < 5 and arousal >= 5 and dominance < 5:
+        return 'frightened'
+    elif valence < 5 and arousal < 5 and dominance >= 5:
+        return 'bored'
+    elif valence < 5 and arousal < 5 and dominance < 5:
+        return 'sad'
+    return None
 
 
 def collect_sample_data(auth, number, geo=False):
@@ -157,12 +184,31 @@ if __name__ == '__main__':
             def tweet_publisher(status):
                 sentiment = get_sentiment(status, emoji_sentiment,
                                           text_sentiment)
+                emotion = get_emotion(status, text_sentiment)
+
+                # try to get the state
+                place_name = status.place.full_name.split(', ')
+                if not len(place_name) > 1:
+                    return
+                state_list = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT',
+                              'DC', 'DE', 'FL', 'FM', 'GA', 'GU', 'HI', 'IA',
+                              'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD',
+                              'ME', 'MH', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT',
+                              'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY',
+                              'OH', 'OK', 'OR', 'PA', 'PR', 'PW', 'RI', 'SC',
+                              'SD', 'TN', 'TX', 'UM', 'UT', 'VA', 'VI', 'VT',
+                              'WA', 'WI', 'WV', 'WY']
+                state = place_name[1]
+                if state not in state_list:
+                    return
                 # only use the tweet if we got a sentiment
-                if not isnan(sentiment):
+                if not isnan(sentiment) and emotion is not None:
                     data = {
                         'tweet': status.text,
                         'coordinates': get_coordinates(status),
-                        'sentiment': sentiment
+                        'sentiment': sentiment,
+                        'emotion': emotion,
+                        'state': state
                     }
                     red.publish('tweet_stream', json.dumps(data))
 
