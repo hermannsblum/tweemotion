@@ -123,9 +123,12 @@ out=anew_dict[test.lower()]
 
 out[1]
 
+t=tweets[2]
+t
+
 x = compSent()
 
-x.compSentiment(tweet)
+x.compSentiment(t)
 
 
         
