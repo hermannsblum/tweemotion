@@ -3,6 +3,10 @@ import webbrowser
 import json
 from sys import argv
 import redis
+from emoji_classifier import EmojiClassifier
+from tweet_cleanup import cleanup
+from compSent import compSent
+from numpy import isnan
 
 red = redis.StrictRedis()
 
@@ -70,6 +74,18 @@ def get_coordinates(tweet):
     return coordinates
 
 
+def get_sentiment(tweet, emoji_classifier, text_classifier):
+    tweet, emojis = cleanup(tweet.text)
+
+    emoji_sentiment = emoji_classifier.classify(emojis)
+    text_sentiment = text_classifier.compSentiment(tweet)
+
+    if not isnan(emoji_sentiment):
+        return 0.65 * emoji_sentiment + 0.35 * text_sentiment
+    else:
+        return text_sentiment
+
+
 def collect_sample_data(auth, number, geo=False):
 
     class Collector(tweepy.StreamListener):
@@ -135,12 +151,20 @@ if __name__ == '__main__':
             collect_sample_data(auth, number, geo=(geo == 'y'))
 
         elif argv[1] == 'publish':
+            emoji_sentiment = EmojiClassifier()
+            text_sentiment = compSent()
+
             def tweet_publisher(status):
-                data = {
-                    'tweet': status.text,
-                    'coordinates': get_coordinates(status)
-                }
-                red.publish('tweet_stream', json.dumps(data))
+                sentiment = get_sentiment(status, emoji_sentiment,
+                                          text_sentiment)
+                # only use the tweet if we got a sentiment
+                if not isnan(sentiment):
+                    data = {
+                        'tweet': status.text,
+                        'coordinates': get_coordinates(status),
+                        'sentiment': sentiment
+                    }
+                    red.publish('tweet_stream', json.dumps(data))
 
             listen(tweet_publisher, auth)
 
