@@ -6,18 +6,6 @@ import redis
 app = Flask(__name__)
 red = redis.StrictRedis()
 
-
-@app.route('/stream')
-def index():
-    if request.headers.get('accept') == 'text/event-stream':
-        def events():
-            #for i, c in enumerate(itertools.cycle('\|/-')):
-                #yield "data: %s %d\n\n" % (c, i)
-            yield "data: hi \n\n"
-            time.sleep(.1)  # an artificial delay
-        return Response(events(), content_type='text/event-stream')
-
-
 @app.route('/tweets')
 def stream():
     # we will use Pub/Sub process to send real-time tweets to client
