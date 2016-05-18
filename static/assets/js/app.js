@@ -24,7 +24,7 @@ function updateMarkers(newMarker) {
 
 
 // create icons for different sentiments
-var image_path = 'http://127.0.0.1:5000/static/assets/img/';
+var image_path = 'http://paillot.info:5000/static/assets/img/';
 
 var veryHappyIcon = L.icon({
     iconUrl: image_path + 'very_happy2.png',
@@ -72,15 +72,15 @@ function pageFullyLoaded(e) {
     L.marker([0, 90], {icon: verySadIcon, opacity: 0}).addTo(mymap);
 
     // load state layer
-    statesData.setStyle({stroke: false, fillOpacity: 0.5});
-    statesData.addTo(mymap);
+    //statesData.setStyle({stroke: false, fillOpacity: 0.5});
+    //statesData.addTo(mymap);
 
-    alabama.setStyle({fillColor: '#FF0000'});
+    //alabama.setStyle({fillColor: '#FF0000'});
 
     // only get tweets if everything else is loaded
     if (!!window.EventSource) {
       // this is requesting a datastream for the tweets
-      var source = new EventSource('http://127.0.0.1:5000/tweets');
+      var source = new EventSource('http://paillot.info:5000/tweets');
       source.onmessage = function(e) {
         // this is exectued for every new incoming tweet
 
