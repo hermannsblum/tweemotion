@@ -106,7 +106,7 @@ except ImportError:
 
 tdict = []
 
-
+    f = file.open
     tweets = json.load(f)
     #for tweet in tweets:
     #    tweet,_ = cleanup(tweet)
