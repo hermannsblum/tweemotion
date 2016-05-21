@@ -1,7 +1,8 @@
 
 // set up the basic map window
 var mymap = L.map('mapid').setView([38, -96], 5);
-
+//var inside = require('point-in-polygon');
+        
 // add map background from openstreetmap
 L.tileLayer("https://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png", {
   maxZoom: 19,
@@ -24,7 +25,8 @@ function updateMarkers(newMarker) {
 
 
 // create icons for different sentiments
-var image_path = 'http://paillot.info:5000/static/assets/img/';
+// OLD PATH var image_path = 'http://paillot.info:5000/static/assets/img/';
+image_path = 'http://0.0.0.0:5000/static/assets/img/' 
 
 var veryHappyIcon = L.icon({
     iconUrl: image_path + 'very_happy2.png',
@@ -72,15 +74,15 @@ function pageFullyLoaded(e) {
     L.marker([0, 90], {icon: verySadIcon, opacity: 0}).addTo(mymap);
 
     // load state layer
-    //statesData.setStyle({stroke: false, fillOpacity: 0.5});
-    //statesData.addTo(mymap);
+    statesData.setStyle({stroke: false, fillOpacity: 0.5});
+    statesData.addTo(mymap);
 
     //alabama.setStyle({fillColor: '#FF0000'});
 
     // only get tweets if everything else is loaded
     if (!!window.EventSource) {
       // this is requesting a datastream for the tweets
-      var source = new EventSource('http://paillot.info:5000/tweets');
+      var source = new EventSource('http://0.0.0.0:5000/tweets');
       source.onmessage = function(e) {
         // this is exectued for every new incoming tweet
 
@@ -88,16 +90,35 @@ function pageFullyLoaded(e) {
         var response = JSON.parse(e.data);
 
         $("#data").text(response.state);
-
+        // inside([response.coordinates[1],response.coordinates[0]],alabama.geometry)
+        alabama.geometry
+        
+        
         var params = {icon: neutralIcon};
         if (response.sentiment < 2) {
           params = {icon: verySadIcon};
+          //curstate=response.state
+          //curstate.setStyle({fillColor: '#FF1111'})
+          //curstate.addTo(mymap);
+
         } else if (response.sentiment < 4) {
           params = {icon: sadIcon};
+          //curstate=response.state
+          //curstate.setStyle({fillColor: '#FF3111'})
+          //curstate.addTo(mymap);
+          
         } else if (response.sentiment > 7.5) {
           params = {icon: veryHappyIcon};
+          //curstate=response.state
+        //  curstate.setStyle({fillColor: '#FF6111'})
+      //    curstate.addTo(mymap);
+          
         } else if (response.sentiment > 6) {
           params = {icon: happyIcon};
+    //      curstate=response.state
+  //        curstate.setStyle({fillColor: '#FF9111'})
+//          curstate.addTo(mymap);
+          
         }
         var marker = L.marker([response.coordinates[1],
                                response.coordinates[0]],

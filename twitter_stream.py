@@ -146,6 +146,7 @@ def collect_sample_data(auth, number, geo=False):
 
     my_stream = tweepy.Stream(auth=api.auth, listener=Collector(max=number))
     my_stream.filter(languages=['en'], locations=[-115, 25, -65, 50])
+    # my_steam.filter(track=['#MySpecialHashtag', '#AlsoThisHashtag'])
 
 
 
