@@ -75,7 +75,9 @@ function pageFullyLoaded(e) {
     statesData.setStyle({stroke: false, fillOpacity: 0.5});
     statesData.addTo(mymap);
 
-    statesDict['AL'].setStyle({fillColor: '#FF0000'});
+    statesDict['AL'].setStyle({fillColor: heatColor(9)});
+    statesDict['CO'].setStyle({fillColor: heatColor(5)});
+    statesDict['CA'].setStyle({fillColor: heatColor(0)});
 
     // only get tweets if everything else is loaded
     if (!!window.EventSource) {
