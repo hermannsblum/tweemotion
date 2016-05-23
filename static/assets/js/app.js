@@ -72,10 +72,10 @@ function pageFullyLoaded(e) {
     L.marker([0, 90], {icon: verySadIcon, opacity: 0}).addTo(mymap);
 
     // load state layer
-    //statesData.setStyle({stroke: false, fillOpacity: 0.5});
-    //statesData.addTo(mymap);
+    statesData.setStyle({stroke: false, fillOpacity: 0.5});
+    statesData.addTo(mymap);
 
-    //alabama.setStyle({fillColor: '#FF0000'});
+    statesDict['AL'].setStyle({fillColor: '#FF0000'});
 
     // only get tweets if everything else is loaded
     if (!!window.EventSource) {
