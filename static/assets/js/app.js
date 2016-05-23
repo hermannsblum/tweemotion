@@ -2,6 +2,36 @@
 // set up the basic map window
 var mymap = L.map('mapid').setView([38, -96], 5);
 
+//Initial functions to compute means
+Array.prototype.sum = Array.prototype.sum || function() {
+  return this.reduce(function(sum, a) { return sum + Number(a) }, 0);
+}
+
+Array.prototype.average = Array.prototype.average || function() {
+  return this.sum() / (this.length || 1);
+}
+
+function setAll(a, v) {
+    var i, n = a.length;
+    for (i = 0; i < n; ++i) {
+        a[i] = v;
+    }
+}
+
+// Initialize array, all are neutral from start
+var N = 50; 
+stateArray = Array.apply(null, {length: N}).map(Number.call, Number)
+setAll(stateArray,5.0)
+
+
+// Updating values in stateArray
+stateArray[stateArray.length] = response.sentiment
+stateArray.average()
+
+// Setting color based on current average sentiment *PSEUDOCODE*
+// color=colorDict[stateArray.average()]
+// colObject.state = color
+
 // add map background from openstreetmap
 L.tileLayer("https://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png", {
   maxZoom: 19,
