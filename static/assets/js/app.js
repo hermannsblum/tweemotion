@@ -2,42 +2,14 @@
 // set up the basic map window
 var mymap = L.map('mapid').setView([38, -96], 5);
 
-//Initial functions to compute means
-Array.prototype.sum = Array.prototype.sum || function() {
-  return this.reduce(function(sum, a) { return sum + Number(a) }, 0);
-}
-
-Array.prototype.average = Array.prototype.average || function() {
-  return this.sum() / (this.length || 1);
-}
-
-function setAll(a, v) {
-    var i, n = a.length;
-    for (i = 0; i < n; ++i) {
-        a[i] = v;
-    }
-}
-
-// Initialize array, all are neutral from start
-var N = 50; 
-stateArray = Array.apply(null, {length: N}).map(Number.call, Number)
-setAll(stateArray,5.0)
-
-
-// Updating values in stateArray
-stateArray[stateArray.length] = response.sentiment
-stateArray.average()
-
-// Setting color based on current average sentiment *PSEUDOCODE*
-// color=colorDict[stateArray.average()]
-// colObject.state = color
-
 // add map background from openstreetmap
 L.tileLayer("https://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png", {
   maxZoom: 19,
   subdomains: ["otile1-s", "otile2-s", "otile3-s", "otile4-s"],
   attribution: 'Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="https://developer.mapquest.com/content/osm/mq_logo.png">. Map data (c) <a href="http://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> contributors, CC-BY-SA.'
 }).addTo(mymap);
+
+
 
 // keep a list of the markers to delete old ones
 var mymarkers = [];
@@ -54,7 +26,7 @@ function updateMarkers(newMarker) {
 
 
 // create icons for different sentiments
-var image_path = 'http://paillot.info:5000/static/assets/img/';
+var image_path = './assets/img/';
 
 var veryHappyIcon = L.icon({
     iconUrl: image_path + 'very_happy2.png',
@@ -102,17 +74,14 @@ function pageFullyLoaded(e) {
     L.marker([0, 90], {icon: verySadIcon, opacity: 0}).addTo(mymap);
 
     // load state layer
-    statesData.setStyle({stroke: false, fillOpacity: 0.5});
+    statesData.setStyle({stroke: false, fillOpacity: 0.5,
+                         fillColor: heatColor(5)});
     statesData.addTo(mymap);
-
-    statesDict['AL'].setStyle({fillColor: heatColor(9)});
-    statesDict['CO'].setStyle({fillColor: heatColor(5)});
-    statesDict['CA'].setStyle({fillColor: heatColor(0)});
 
     // only get tweets if everything else is loaded
     if (!!window.EventSource) {
       // this is requesting a datastream for the tweets
-      var source = new EventSource('http://paillot.info:5000/tweets');
+      var source = new EventSource('http://0.0.0.0:5000/tweets');
       source.onmessage = function(e) {
         // this is exectued for every new incoming tweet
 
@@ -121,6 +90,7 @@ function pageFullyLoaded(e) {
 
         $("#data").text(response.state);
 
+        // show a marker
         var params = {icon: neutralIcon};
         if (response.sentiment < 2) {
           params = {icon: verySadIcon};
@@ -136,6 +106,10 @@ function pageFullyLoaded(e) {
                                params);
 
         updateMarkers(marker);
+
+        // update states heatmap
+        var newAverage = stateSentiments[response.state].update(response.sentiment);
+        statesDict[response.state].setStyle({fillColor: heatColor(newAverage)});
       }
     }
 }

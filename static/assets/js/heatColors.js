@@ -1,3 +1,89 @@
+// rolling mean computations
+
+// INITIALISATIONS
+
+Array.prototype.sum = Array.prototype.sum || function() {
+  return this.reduce(function(sum, a) { return sum + Number(a) }, 0);
+}
+Array.prototype.average = Array.prototype.average || function() {
+  if (this.length > 1) {
+    return this.sum() / (this.length || 1);
+  } else {
+    // no sentiemnt values yet, return 5
+    return 5.0;
+  }
+}
+Array.prototype.update = function(v) {
+  // add a new sentiment value to the array
+  // if array has more then 30 values, remove the oldest 
+  this.push(v);
+
+  if (this.length > 30) {
+    // remove oldest value
+    this.shift();
+  }
+
+  return this.average()
+}
+
+// set up an array for all states
+var stateSentiments = {
+    "AL": [],
+    "AZ": [],
+    "AR": [],
+    "CA": [],
+    "CO": [],
+    "CT": [],
+    "DE": [],
+    "DC": [],
+    "FL": [],
+    "GA": [],
+    "HI": [],
+    "ID": [],
+    "IL": [],
+    "IN": [],
+    "IA": [],
+    "KS": [],
+    "KY": [],
+    "LA": [],
+    "ME": [],
+    "MD": [],
+    "MA": [],
+    "MI": [],
+    "MN": [],
+    "MS": [],
+    "MO": [],
+    "MT": [],
+    "NE": [],
+    "NV": [],
+    "NH": [],
+    "NJ": [],
+    "NM": [],
+    "NY": [],
+    "NC": [],
+    "ND": [],
+    "OH": [],
+    "OK": [],
+    "OR": [],
+    "PA": [],
+    "PR": [],
+    "RI": [],
+    "SC": [],
+    "SD": [],
+    "TN": [],
+    "TX": [],
+    "UT": [],
+    "VT": [],
+    "VA": [],
+    "WA": [],
+    "WV": [],
+    "WI": [],
+    "WY": []
+};
+
+
+// color calculations
+
 function heatColor(sentiment)  {
     var h = 0.33 * sentiment / 9;
     var l = 0.5 - 0.2 * sentiment / 9;
