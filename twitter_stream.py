@@ -151,7 +151,12 @@ def collect_sample_data(auth, number, geo=False):
 
 if __name__ == '__main__':
 
-    if len(argv) != 2 or argv[1] not in ['sample', 'stream', 'publish']:
+    if len(argv) == 2:
+        arg = argv[1]
+    else:
+        arg = 'publish'
+
+    if arg not in ['sample', 'stream', 'publish']:
         print('Please provide an argument.\nEither "sample" or "stream".')
 
     else:
@@ -162,7 +167,7 @@ if __name__ == '__main__':
         # authentication
         auth = connect(remote=(remote == 'y'))
 
-        if argv[1] == 'sample':
+        if arg == 'sample':
             correct = False
             while not correct:
                 number = raw_input('How many tweets should I collect? ')
@@ -177,7 +182,13 @@ if __name__ == '__main__':
 
             collect_sample_data(auth, number, geo=(geo == 'y'))
 
-        elif argv[1] == 'publish':
+        elif arg == 'stream':
+            def tweet_printer(status):
+                print(status.text)
+
+            listen(tweet_printer, auth)
+
+        else:
             emoji_sentiment = EmojiClassifier()
             text_sentiment = compSent()
 
@@ -187,6 +198,8 @@ if __name__ == '__main__':
                 emotion = get_emotion(status, text_sentiment)
 
                 # try to get the state
+                if not hasattr(status.place, 'full_name'):
+                    return
                 place_name = status.place.full_name.split(', ')
                 if not len(place_name) > 1:
                     return
@@ -213,9 +226,3 @@ if __name__ == '__main__':
                     red.publish('tweet_stream', json.dumps(data))
 
             listen(tweet_publisher, auth)
-
-        elif argv[1] == 'stream':
-            def tweet_printer(status):
-                print(status.text)
-
-            listen(tweet_printer, auth)
