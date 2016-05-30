@@ -18,8 +18,13 @@ def stream():
         for message in pubsub.listen():
             yield 'data: %s\n\n' % message['data']
             # time.sleep(.1)  # an artificial delay
-    return Response(stream_with_context(event_stream()),
-                    mimetype="text/event-stream")
+
+    response = Response(stream_with_context(event_stream()),
+                        mimetype="text/event-stream")
+    response.headers['Expires'] = "Thu, 01 Dec 1983 20:00:00 GMT"
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
 
 
 if __name__ == '__main__':
