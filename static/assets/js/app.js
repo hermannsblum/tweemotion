@@ -21,6 +21,7 @@ function updateMarkers(newMarker) {
     if (mymarkers.length > 100) {
         oldMarker = mymarkers.shift();
         mymap.removeLayer(oldMarker);
+        delete oldMarker;
     }
 }
 
@@ -63,7 +64,9 @@ var verySadIcon = L.icon({
 // wait for page fully loaded
 window.addEventListener("load", pageFullyLoaded, false);
 
-function pageFullyLoaded(e) {
+
+
+function pageFullyLoaded(e, $window) {
     // now fully loaded
 
     // first create invisible markers so the images are loaded
@@ -79,7 +82,8 @@ function pageFullyLoaded(e) {
     statesData.addTo(mymap);
 
     // only get tweets if everything else is loaded
-    if (!!window.EventSource) {
+    
+    function setTweetListener() {
       // this is requesting a datastream for the tweets
       var source = new EventSource('http://0.0.0.0:5000/tweets');
       source.onmessage = function(e) {
@@ -110,6 +114,19 @@ function pageFullyLoaded(e) {
         // update states heatmap
         var newAverage = stateSentiments[response.state].update(response.sentiment);
         statesDict[response.state].setStyle({fillColor: heatColor(newAverage)});
+
+        delete response;
+        e.data = ""; 
+        delete e;
       }
     }
+
+
+    setTweetListener();
+    /*
+    setTimeout(function() {
+      $window.source.close();
+      $window.source = setTweetListener();
+    }, 1000);
+    */
 }
