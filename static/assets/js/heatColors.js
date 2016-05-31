@@ -125,12 +125,12 @@ var hslToHex = function(h, s, l){
         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         var p = 2 * l - q;
         r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
+        g = hue2rgb(p, q, h );
         b = hue2rgb(p, q, h - 1/3);
     }
 
-    r_hex = componentToHex(Math.round(r * 255));
-    g_hex = componentToHex(Math.round(g * 255));
-    b_hex = componentToHex(Math.round(b * 255));
+    r_hex = componentToHex(Math.round(r * 200));
+    g_hex = componentToHex(Math.round(g * 130));
+    b_hex = componentToHex(Math.round(b * 180));
     return '#' + r_hex + g_hex + b_hex;
 };

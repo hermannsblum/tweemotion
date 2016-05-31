@@ -29,4 +29,5 @@ def stream():
 
 if __name__ == '__main__':
     port = raw_input('set port:')
-    app.run(host='188.166.148.125', port=int(port))
+    #app.run(host='188.166.148.125', port=int(port))
+    app.run(host='0.0.0.0', port=int(port))
