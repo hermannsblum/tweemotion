@@ -86,7 +86,7 @@ function pageFullyLoaded(e, $window) {
     function setTweetListener() {
       // this is requesting a datastream for the tweets
       //var source = new EventSource('http://188.166.148.125:5000/tweets');
-      var source = new EventSource('http://0.0.0.0:5000/tweets');
+      var source = new EventSource('http://188.166.148.125:5000/tweets');
       source.onmessage = function(e) {
         // this is exectued for every new incoming tweet
 
